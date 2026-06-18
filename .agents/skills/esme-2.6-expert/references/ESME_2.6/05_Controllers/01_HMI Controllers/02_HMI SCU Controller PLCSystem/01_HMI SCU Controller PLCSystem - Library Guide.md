@@ -1,0 +1,25 @@
+# HMI SCU Controller PLCSystem - Library Guide
+
+![](images/logo.png)
+
+HMI SCU Controller PLCSystem - Library Guide
+
+Magelis SCU - HMI Controller - PLCSystem Library Guide
+
+![G-SE-0022117.1.gif-high.gif](images/G-SE-0022117.1.gif-high.gif)
+
+This document will acquaint you with the system functions and variables offered within the HMI SCU controller. The HMI SCU PLCSystem library contains functions and variables to get information and send commands to the controller system.
+
+This document describes the data types functions and variables of the HMI SCU PLCSystem library.
+
+The following basic knowledge is required:
+
+obasic information on functionality, structure, and configuration of the HMI SCU
+
+oprogramming in the FBD, LD, ST, IL or CFC language
+
+oSystem Variables (globals variables)
+
+EIO0000001246.03
+
+© 2016 Schneider Electric. All rights reserved.

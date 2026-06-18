@@ -13,8 +13,5 @@
 **/.DS_Store
 **/Thumbs.db
 
-# Ignore the huge ESME 2.6 manual documentation files
-# We keep them physically in the same folder, but do not track them in Git
-.agents/skills/esme-2.6-expert/references/ESME_2.6/
 # Ignore duplicated copy residues
 .agents/.agents/
