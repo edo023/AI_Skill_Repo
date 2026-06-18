@@ -1,11 +1,17 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
+# Ignore everything in the root by default
+/*
 
-# OS Files
-.DS_Store
-Thumbs.db
+# Allow specific files and folders
+!/.gitignore
+!/README.md
+!/.agents/
+
+# Ignore python caches and OS files inside allowed folders
+**/__pycache__/
+**/*.py[cod]
+**/*$py.class
+**/.DS_Store
+**/Thumbs.db
 
 # Ignore the huge ESME 2.6 manual documentation files
 # We keep them physically in the same folder, but do not track them in Git
