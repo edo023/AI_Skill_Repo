@@ -1,82 +1,60 @@
 import os
 import argparse
-import subprocess
-import shlex
 
-ESME_DIR = r"C:\Users\Alfre\.gemini\antigravity\scratch\ESME_2.6"
-
-def get_candidates_via_findstr(term):
-    """Run findstr to find files containing the term."""
-    try:
-        # Run findstr in ESME_DIR
-        cmd = f'findstr /s /i /m "{term}" *.md'
-        # We use shell=True to easily handle wildcards and redirection on Windows
-        res = subprocess.run(
-            cmd,
-            shell=True,
-            cwd=ESME_DIR,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.DEVNULL,
-            text=True,
-            timeout=5
-        )
-        if res.returncode == 0:
-            lines = res.stdout.splitlines()
-            return [os.path.join(ESME_DIR, line.strip()) for line in lines if line.strip()]
-    except Exception:
-        pass
-    return []
+# Resolve path dynamically relative to this script
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+ESME_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, "..", "references", "ESME_2.6"))
 
 def search_esme(query_str, limit=10):
     terms = [t.lower() for t in query_str.split() if len(t) > 1]
     if not terms:
         terms = [query_str.lower()]
 
-    candidates = set()
+    results = []
 
-    # Step 1: Collect candidates where filename matches any term
+    # Step 1: Walk the directory and collect matches based on filename/path
     for root, dirs, files in os.walk(ESME_DIR):
         if "images" in dirs:
             dirs.remove("images")
+        
         for file in files:
-            if file.endswith(".md"):
-                file_lower = file.lower()
-                if any(term in file_lower for term in terms):
-                    candidates.add(os.path.join(root, file))
+            if not file.endswith(".md"):
+                continue
 
-    # Step 2: Use findstr to get content-based candidates for the most specific (longest) term
-    longest_term = max(terms, key=len)
-    if len(longest_term) >= 3:
-        findstr_files = get_candidates_via_findstr(longest_term)
-        candidates.update(findstr_files)
+            file_path = os.path.join(root, file)
+            rel_path = os.path.relpath(file_path, ESME_DIR)
+            rel_path_lower = rel_path.lower()
+            filename_lower = file.lower()
 
-    # Step 3: Score the candidates
-    results = []
-    for file_path in candidates:
-        try:
-            filename = os.path.basename(file_path)
-            filename_lower = filename.lower()
+            # Check if all terms appear somewhere in the path
+            if not all(term in rel_path_lower for term in terms):
+                continue
+
             score = 0
             matches = {}
 
-            with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
-                content = f.read()
-
-            content_lower = content.lower()
-
+            # Calculate score based on filename and directory match
             for term in terms:
-                # Filename match bonus
                 if term in filename_lower:
                     score += 150
-                    matches[term] = matches.get(term, 0) + 15
-                
-                cnt = content_lower.count(term)
-                if cnt > 0:
-                    score += cnt * 10
-                    matches[term] = matches.get(term, 0) + cnt
+                    matches[term] = 15
+                elif term in rel_path_lower:
+                    score += 50
+                    matches[term] = 5
 
-            if score > 0:
-                # Extract snippet
+            # Step 2: Open only this matching file to refine score and get snippet
+            try:
+                with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+                    content = f.read()
+                
+                content_lower = content.lower()
+                for term in terms:
+                    cnt = content_lower.count(term)
+                    if cnt > 0:
+                        score += cnt * 10
+                        matches[term] = matches.get(term, 0) + cnt
+
+                # Snippet extraction
                 snippet = ""
                 first_term = next((term for term in terms if term in content_lower), None)
                 if first_term:
@@ -88,12 +66,20 @@ def search_esme(query_str, limit=10):
 
                 results.append({
                     "abs_path": file_path,
+                    "rel_path": rel_path,
                     "score": score,
                     "snippet": snippet,
                     "matches": matches
                 })
-        except Exception:
-            pass
+            except Exception:
+                # If we fail to read, still keep it as a match but with path score
+                results.append({
+                    "abs_path": file_path,
+                    "rel_path": rel_path,
+                    "score": score,
+                    "snippet": "",
+                    "matches": matches
+                })
 
     # Sort results
     results.sort(key=lambda x: x["score"], reverse=True)
@@ -104,8 +90,7 @@ def search_esme(query_str, limit=10):
         return
 
     for i, res in enumerate(results[:limit]):
-        rel_path = os.path.relpath(res["abs_path"], ESME_DIR)
-        print(f"\n[{i+1}] {rel_path} (Score: {res['score']})")
+        print(f"\n[{i+1}] {res['rel_path']} (Score: {res['score']})")
         print(f"    Path: [link](file:///{res['abs_path'].replace(os.sep, '/')})")
         if res['snippet']:
             print(f"    Snippet: {res['snippet']}")

@@ -5,12 +5,12 @@ description: Triggered when asked about EcoStruxure Machine Expert (ESME) 2.6, P
 
 # ESME 2.6 Expert Skill
 
-This skill allows the agent to act as an expert on Schneider Electric's **EcoStruxure Machine Expert (ESME) 2.6** suite by using the locally downloaded and structured manual.
+This skill allows the agent to act as an expert on Schneider Electric's **EcoStruxure Machine Expert (ESME) 2.6** suite by using the locally consolidated manual.
 
 ## Documentation Location
 
-The complete, segmented manual in Markdown format is stored at:
-📁 `C:\Users\Alfre\.gemini\antigravity\scratch\ESME_2.6\`
+The complete, segmented manual in Markdown format is stored directly inside this skill's references directory:
+📁 `.agents/skills/esme-2.6-expert/references/ESME_2.6/`
 
 ## Category Structure
 
@@ -30,6 +30,6 @@ The manual is divided into 9 top-level categories:
 When answering queries about ESME 2.6:
 1. Use the search script at `.agents/skills/esme-2.6-expert/scripts/search_esme.py` to search for keywords in the documentation.
 2. Run the script from the command line:
-   `python C:\Users\Alfre\.gemini\antigravity\scratch\gemini-skills\.agents\skills\esme-2.6-expert\scripts\search_esme.py --query "your search terms"`
+   `python .agents/skills/esme-2.6-expert/scripts/search_esme.py --query "your search terms"`
 3. Examine the returned matching file paths and read the most relevant files using the `view_file` tool to extract exact details (code snippets, parameters, wiring diagrams).
 4. Always cite the file name and path in your response to the user so they can reference it in their workspace.
